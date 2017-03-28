@@ -1,6 +1,7 @@
                   <?php
+      include_once("Controller/mesajlarC.php");
     $id=$_SESSION['staj']['id'];
-    $diziMesajlarSayisi=gelenGidenMesajSayisi($id);
+    $diziMesajlarSayisi=MesajlarC::gelenGidenMesajSayisi($id);
       ?>
       <ul class="sidebar-menu">
         <li class="header">DANIŞMAN  İŞLEMLERİ</li>

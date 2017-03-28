@@ -2,14 +2,7 @@
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
-              <h3 class="box-title">
-              <?php
-              if ($_GET["rol"]==1)
-                echo "Öğrenci Proje Önerileri";
-              else if ($_GET["rol"]==2) {
-                echo "Danışman Proje Önerileri";
-              }
-               ?>
+              <h3 class="box-title">Danışman Proje Önerileri
               </h3>
 
               <div class="box-tools">
@@ -29,13 +22,43 @@
                   <th>ID</th>
                   <th>Öneren</th>
                   <th>Proje</th>
-                  <th>Proje Türü</th>
-                  <th>Grup</th>
-                  <th>Danışman</th>
-                  <th>Durum</th>
+                  <th>Proje Konu</th>
+                  <th>Kişi Sayısı</th>
+                  <th>Danışman Sayısı</th>
+                  <th>Projenin Durumu</th>
                 </tr>
                 <?php
-                  onerilenProjeler();
+                include_once("Controller/onerilenProjelerC.php");
+                include_once("Model/proje.php");
+                $sonuc=OnerilenProjelerC::komisyonOnerilenProjeDurum();
+                
+               while($row=mysqli_fetch_array($sonuc))
+               {
+                 echo '<tr data-cost='.$row["pId"].'>';
+                 echo '<td>'.$row["pId"].'</td>';
+                 echo '<td>'.$row["dAdi"].' '.$row["dSoyadi"].'</td>';
+                 echo '<td>'.$row["pAdi"].'</td>';
+                 echo '<td>'.$row["pKonu"].'</td>';
+                 echo '<td>'.$row["kisi_sayisi"].'</td>';
+                 echo '<td>'.$row["danisman_sayisi"].'</td>';
+                 echo '<td>';
+                 echo '<div class="form-group">';
+                 echo '<select class="form-control">';
+                 $sonuc2=Proje::projeDurumList();
+                 $i=0;
+                 while ($row2=mysqli_fetch_array($sonuc2)) {
+                   if($row["pdId"]==$i)
+                    echo '<option value="'.$i.'" selected>'.$row2["durum"].'</option>';
+                   else
+                    echo '<option value="'.$i.'">'.$row2["durum"].'</option>';
+                   $i++;
+                }
+                echo '</select>';
+                echo '</div>';
+                echo '</td>';
+                echo '</tr>';
+                }
+
                 ?>
               </table>
             </div>
@@ -61,6 +84,8 @@
               success:function(sonuc)
               {
                 console.log(sonuc);
+                if(durum==2)
+                  window.location = "index.php?sayfa=mesajlar&aliciId="+sonuc+"";
               }
             });
         });

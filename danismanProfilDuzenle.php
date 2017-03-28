@@ -1,4 +1,5 @@
 <?php
+		include_once("/Controller/danismanProfilDuzenleC.php");
 if(@$_POST["sil"]){
 			global $conn;
 			$id=$_POST["anid"];
@@ -8,14 +9,10 @@ if(@$_POST["sil"]){
 	
 }
 if (@$_POST["profilduzenle"]) {
-  echo profilGuncelleDanisman();
+  $sonuc=DanismanProfilDuzenleC::profilDuzenle();// nesne üzerinden değil de sınıf üzerinden func çalıştırdım
+  echo $sonuc;
 }
-	$id =$_SESSION["staj"]["id"];
-	global $conn;
-  $query_profil="SELECT * from tbl_kullanici as k inner join tbl_danisman as d on k.id=d.user_id where k.id='$id'";
-			
-	$kisi_sonuc=mysqli_query($conn,$query_profil);
-	$kisi =mysqli_fetch_array($kisi_sonuc);
+	$kisi =DanismanProfilDuzenleC::profilGetir();
 ?>
 <center>
         <div class="col-md-6" >

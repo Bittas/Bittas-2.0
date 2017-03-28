@@ -2,21 +2,34 @@
 
  require_once("include/config.php");
  require_once("include/function.php");
- echo danismanOgrenciKayitOnayla();
+ include_once("Model/danisman.php");
+ if(isset($_POST['sil'])){
+     echo kayitSil();
+ }
+ else if(isset($_POST['pasifYap'])){
+    echo danismanOgrenciKayitOnayla();
+ }
 
 	function danismanOgrenciKayitOnayla(){
-    global $conn;
-    $kullaniciID = $_POST['id'];
-    $pasifYap = $_POST['pasifYap'];
-         if($pasifYap==1){ 
-            $query2="UPDATE tbl_kullanici AS k SET k.onay=1 WHERE k.id=$kullaniciID";
-                if(mysqli_query($conn,$query2)==1)
-                { 
-                    return successMesaj("Kayıt onaylanmıştır."); 
-
-                }else{
-                    return errorMesaj("Bir hata oluştu.");
-                } 
+        $danisman=Danisman::getDanismanNesne();
+        $kullaniciID = $_POST['id'];
+        $onay = $_POST['pasifYap'];
+        if($danisman->danismanOgrenciKayitOnayla($kullaniciID,$onay)){
+            if($onay=="1")
+                return successMesaj("Kayıt onaylandı."); 
+            else if($onay=="0")
+                return successMesaj("Kayıt onayı kaldırıldı."); 
         }
+        else
+            return errorMesaj("Bir hata oluştu.");
 	}
+    function kayitSil()
+    {
+        $danisman=Danisman::getDanismanNesne();
+        $sonuc=$danisman->danismanOgrenciKayitSil($_POST['id']);
+        if($sonuc=="kayıt silindi")
+            return successMesaj($sonuc);
+        else
+            return errorMesaj($sonuc);
+    }
 ?>

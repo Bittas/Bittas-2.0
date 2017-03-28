@@ -1,7 +1,7 @@
       <?php
-
+      include_once("Controller/mesajlarC.php");
     $id=$_SESSION['staj']['id'];
-    $diziMesajlarSayisi=gelenGidenMesajSayisi($id);
+    $diziMesajlarSayisi=MesajlarC::gelenGidenMesajSayisi();
 
     require_once("Controller/OgrenciProjeBasvuruC.php");
     $ogrenciProje=new OgrenciProjeBasvuruC();

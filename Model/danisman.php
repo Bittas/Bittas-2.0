@@ -7,7 +7,15 @@ class Danisman extends Kullanici implements IDanisman
   private $tc;
   private $unvan;
   private $user_id;
-  private $uni_id;
+  private $uni;
+  private static $danismanNesne;
+
+  public static function getDanismanNesne()
+  {
+    if(@$danismanNesne==null)//undefine diyor
+      $danismanNesne=new Danisman();
+    return $danismanNesne;
+  }
 
   public function getTc()
   {
@@ -31,12 +39,12 @@ class Danisman extends Kullanici implements IDanisman
   {
     $this->user_id=$value;
   }
-  public function getUniId(){
-    return $this->uni_id;
+  public function getUni(){
+    return $this->uni;
   }
-  public function setUniId($value)
+  public function setUni($value)
   {
-    $this->uni_id=$value;
+    $this->uni=$value;
   }
 
   public function danismanId($kullaniciId)
@@ -54,50 +62,53 @@ class Danisman extends Kullanici implements IDanisman
            return $sutun["danismanID"];
   }
 
-	function danismanOgrenciKayitOnayBekleyen(){
+	function danismanOgrenciKayitOnayBekleyen()
+	{
 		global $conn;
 		$sorgu="SELECT k.id AS kID, o.numara AS oNo, k.mail AS oEmail FROM tbl_kullanici AS k
-INNER JOIN tbl_ogrenci AS o ON o.user_id=k.id
-WHERE k.rol=1 AND k.onay=0";
+		INNER JOIN tbl_ogrenci AS o ON o.user_id=k.id
+		WHERE k.rol=1 AND k.onay=0";
 		$sonuc=mysqli_query($conn,$sorgu);
-		if ($sonuc) {
-			while($satir=mysqli_fetch_array($sonuc)){
-				echo '
-                <tr data-cost='.$satir["kID"].'>
-                  <td>'.$satir["oNo"].'</td>
-                  <td>'.$satir["oEmail"].'</td>
-                  <td><input type="checkbox" class="pasif" id="'.$satir["kID"].'" onchange="OgrKayitOnay(this);"
-                   value="'.$satir["kID"].'"></td>
-                </tr>
-				';
-			}
-		}
+		if ($sonuc)
+			return $sonuc;
 		else
-			echo "sorgu hatalı";
+			return "sorgu hatalı";
 	}
 
 
 	function danismanOgrenciKayitOnaylilar(){
 		global $conn;
 		$sorgu="SELECT k.id AS kID, o.numara AS oNo, k.mail AS oEmail FROM tbl_kullanici AS k
-INNER JOIN tbl_ogrenci AS o ON o.user_id=k.id
-WHERE k.rol=1 AND k.onay=1";
+		INNER JOIN tbl_ogrenci AS o ON o.user_id=k.id
+		WHERE k.rol=1 AND k.onay=1";
 		$sonuc=mysqli_query($conn,$sorgu);
-		if ($sonuc) {
-			while($satir=mysqli_fetch_array($sonuc)){
-				echo '
-                <tr data-cost='.$satir["kID"].'>
-                  <td>'.$satir["oNo"].'</td>
-                  <td>'.$satir["oEmail"].'</td>
-                  <td><input type="checkbox" class="pasif" checked id="'.$satir["kID"].'" onchange="OgrKayitIptal(this);"
-                   value="'.$satir["kID"].'"></td>
-                </tr>
-				';
-			}
-		}
+		if ($sonuc)
+			return $sonuc;
 		else
-			echo "sorgu hatalı";
+			return "sorgu hatalı";
 	}
+  public function danismanOgrenciKayitSil($id)
+  {
+    global $conn;
+    $sorgu1="DELETE FROM tbl_kullanici WHERE id=$id";
+    if(mysqli_query($conn,$sorgu1)){
+      $sorgu2="DELETE FROM tbl_ogrenci WHERE user_id=$id";
+      if(mysqli_query($conn,$sorgu2))
+        return "kayıt silindi";
+      else
+        return "sorgu 2";
+    }
+      else
+        return "sorgu 1";
+  }
+  public function danismanOgrenciKayitOnayla($id,$onay)
+  {
+    global $conn;
+    $sorgu="UPDATE tbl_kullanici AS k SET k.onay=$onay WHERE k.id=$id";
+    $sonuc=mysqli_query($conn,$sorgu);
+    if($sonuc)
+      return true;
+  }
 
 
   function danismankontrol($proje_id)
@@ -115,26 +126,16 @@ WHERE k.rol=1 AND k.onay=1";
   }
 
 
-  	function profilGuncelleDanisman()
+  	function profilGuncelleDanisman($id)
   	{
-  		$id =$_SESSION["staj"]["id"];
-
-  		$mail=temizle(@$_POST["mail"]);
-  		$parola=temizle(@$_POST["parola"]);
-  		$adi=temizle(@$_POST["ad"]);
-  		$soyadi=temizle(@$_POST["soyad"]);
-  		$tc=temizle(@$_POST["tc"]);
-  		$unvan=temizle(@$_POST["unvan"]);
-  		$uni=temizle(@$_POST["uni"]);
-  		$hakkimda=temizle(@$_POST["hakkimda"]);
 
   		global $conn;
   		$msg ="";
-  		$query ="UPDATE tbl_kullanici SET adi='$adi' , soyadi ='$soyadi' ,mail ='$mail',hakkimda='$hakkimda' ";
-  		$yuklenecek_dosya = "profil/" . md5($_FILES['foto']['name']).substr($_FILES['foto']['name'], -4);
-  		if($_FILES["foto"]["name"] != "")
+  		$query ="UPDATE tbl_kullanici SET adi='".parent::getAdi()."' , soyadi ='".parent::getSoyadi()."' ,mail ='".parent::getMail()."',hakkimda='".parent::getHakkimda()."' ";
+  		$yuklenecek_dosya = "profil/" . md5(parent::getFoto()['name']).substr(parent::getFoto()['name'], -4);
+  		if(parent::getFoto()["name"] != "")
   		{
-  			if (move_uploaded_file($_FILES['foto']['tmp_name'], $yuklenecek_dosya))
+  			if (move_uploaded_file(parent::getFoto()['tmp_name'], $yuklenecek_dosya))
   			{
   			    $query .=",foto='$yuklenecek_dosya' ";
   			    $_SESSION["staj"]["foto"]=$yuklenecek_dosya;
@@ -145,22 +146,29 @@ WHERE k.rol=1 AND k.onay=1";
   				$msg =errorMesaj("Foto yüklenemedi");
   			}
   		}
-  		if($parola !="")
+  		if(parent::getParola() !="")
   		{
-  			$parola =md5($parola);
-  			$query .=" , parola='$parola'";
+  			parent::setParola(md5(parent::getParola()));
+  			$query .=" , parola='".parent::getParola()."'";
   		}
   		$query .=" where id =$id ; ";
-  		$query2="UPDATE tbl_danisman AS d SET tc='$tc', unvan='$unvan', uni_id=$uni WHERE user_id=$id";
+  		$query2="UPDATE tbl_danisman AS d SET tc='$this->tc', unvan='$this->unvan', uni_id=$this->uni WHERE user_id=$id";
   		if(mysqli_query($conn,$query) && mysqli_query($conn,$query2))
   		{
-  			return successMesaj("Kayıt işlemi başarılı");
+  			return successMesaj("Profiliniz güncellenmiştir");
   		}else
   		{
-  			return errorMesaj("Kayıt işlemi tamamlanamadı");
+  			return errorMesaj("Profil güncelleme işleminde hata");
   		}
   	}
 
+    function danismanProfilGetir($id){//////// dikkat
+      global $conn;
+      $query_profil="SELECT * from tbl_kullanici as k inner join tbl_danisman as d on k.id=d.user_id where k.id='$id'";
+
+      $kisi_sonuc=mysqli_query($conn,$query_profil);
+      return mysqli_fetch_array($kisi_sonuc);
+    }
 
     function danismanOgrenciProjeListeleme($projeTipi,$proje){
 
@@ -188,7 +196,7 @@ WHERE k.rol=1 AND k.onay=1";
                   OP.onay = 1 AND  P.turu='.$proje->getTur().' AND P.kisi_sayisi'.$projeTipi.'1 AND P.projedurum_id='.$proje->getDurum().'
                 ORDER BY OP.proje_id
 
-                  '; 
+                  ';
         $currentId=0; $sayac=0;
          $sonuc =mysqli_query($conn,$query);
     	       while(@$sutun=mysqli_fetch_array($sonuc)){
@@ -214,6 +222,7 @@ WHERE k.rol=1 AND k.onay=1";
 
                }
         }
+
 
 
         	function projeOner(){
@@ -243,6 +252,217 @@ WHERE k.rol=1 AND k.onay=1";
         				echo errorMesaj("Proje önerisi başarısız...");
         			}
         	}
-}
+/////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  function onerilenProjeler()
+  {
+      global $conn;
+      $kullaniciID=$_SESSION["staj"]["id"];
+      $danismanID=danismanId($kullaniciID);
+        if (isset($_GET["rol"])) {
+          $rol=$_GET["rol"];
+        }
+
+            if ($_SESSION["staj"]["rol"] == 1) {
+              $sorgu="select op.proje_id as op_proje_id, op.onay, p.id as p_id, p.oneren_id, p.adi, p.konu, p.accept_date, p.end_date, p.kisi_sayisi, p.danisman_sayisi, d.id as d_id, d.durum from tbl_ogrenci_proje as op left join tbl_proje as p on op.proje_id=p.id left join tbl_projedurum as d on p.projedurum_id=d.id left join tbl_onay as o on o.id= where op.ogrenci_id='$kullaniciID'";
+            }
+            else if($_SESSION["staj"]["rol"] == 2){
+            $sorgu="select p.id, p.adi, p.konu, p.kisi_sayisi, p.danisman_sayisi, d.durum from tbl_proje as p left join tbl_projedurum as d on p.projedurum_id=d.id where p.oneren_id='$danismanID'";
+            $sorgu="SELECT
+                p.id,
+                p.adi,
+                p.konu,
+                p.turu,
+                pt.tur AS pTur,
+                p.kisi_sayisi,
+                p.danisman_sayisi,
+                d.durum
+                FROM tbl_proje AS p
+                INNER JOIN tbl_projedurum AS d ON p.projedurum_id=d.id
+                INNER JOIN tbl_projeturu AS pt ON pt.id=p.turu
+                WHERE p.oneren_id='$danismanID'";
+            }
+            else if($_SESSION["staj"]["rol"] == 3){
+              /*if ($rol==1) {
+                $sorgu="SELECT
+                o.id AS ogId,
+                k.adi AS ogAdi,
+                k.soyadi AS ogSoyadi,
+                k.rol,
+                p.id AS pId,
+                p.adi AS pAdi,
+                p.konu AS pKonu,
+                p.turu,
+                pt.tur AS pTur,
+                p.kisi_sayisi,
+                p.danisman_sayisi,
+                pd.id AS pdId,
+                pd.durum
+                FROM tbl_kullanici AS k
+                INNER JOIN tbl_ogrenci AS o ON o.user_id=k.id
+                INNER JOIN tbl_proje AS p ON p.oneren_id=o.id
+                INNER JOIN tbl_projeturu AS pt ON pt.id=p.turu
+                INNER JOIN tbl_projedurum AS pd ON pd.id=p.projedurum_id
+                WHERE k.rol=1";
+              }*/
+               if ($rol==2) {
+                $sorgu="SELECT
+                  d.id AS dId,
+                  k.adi as dAdi,
+                  k.soyadi AS dSoyadi,
+                  k.rol,
+                  p.id as pId,
+                  p.adi AS pAdi,
+                  p.konu AS pKonu,
+                  p.turu,
+                  pt.tur AS pTur,
+                  p.kisi_sayisi,
+                  p.danisman_sayisi,
+                  pd.id as pdId,
+                  pd.durum
+                  FROM tbl_kullanici AS k
+                  INNER JOIN tbl_danisman AS d ON d.user_id=k.id
+                  INNER JOIN tbl_proje AS p ON p.oneren_id=d.id
+                  INNER JOIN tbl_projeturu AS pt ON pt.id=p.turu
+                  INNER JOIN tbl_projedurum AS pd ON pd.id=p.projedurum_id
+                  WHERE k.rol=2";
+            }
+      }
+        //	$sorgu="select p.id, p.oneren_id, p.adi, p.konu, p.kisi_sayisi, p.danisman_sayisi, d.id as d_id,
+        // d.durum from tbl_proje as p left join tbl_projedurum as d on p.projedurum_id=d.id";
+          //$sorgu1 = "SELECT COUNT(`tbl_mesaj`.`id`) FROM `tbl_mesaj` LEFT JOIN `tbl_kullanici` ON tbl_mesaj.gonderen_id = tbl_kullanici.id WHERE `alici_id`='".$id."'";
+          //$query_uni ="Select id, uni_adi from tbl_proje";
+      $sonuc =mysqli_query($conn,$sorgu);
+
+      if($sonuc)
+      {
+            if ($_SESSION["staj"]["rol"] == 1) {
+              return $sonuc;
+            }
+        else{
+
+                    while($row=mysqli_fetch_array($sonuc))
+                    {
+            if($_SESSION["staj"]["rol"] == 2){
+              $durum = $row["durum"];
+              if ($durum == "Revize")
+              {
+                echo '<tr>';
+                echo '<td>'.$row["id"].'</td>';
+                echo '<td>'.$row["adi"].'</td>';
+                echo '<td>'.$row["pTur"].'</td>';
+                echo '<td>'.$row["kisi_sayisi"].'</td>';
+                echo '<td>'.$row["danisman_sayisi"].'</td>';
+                echo '<td>'.$row["durum"].'</td>';
+                echo '<td><a href="index.php?sayfa=proje-revize&id='.$row["id"].'" class="fa fa-search"/></td>';
+                echo '</tr>';
+              }else {
+                echo '<tr>';
+                echo '<td>'.$row["id"].'</td>';
+                echo '<td>'.$row["adi"].'</td>';
+                echo '<td>'.$row["pTur"].'</td>';
+                echo '<td>'.$row["kisi_sayisi"].'</td>';
+                echo '<td>'.$row["danisman_sayisi"].'</td>';
+                echo '<td>'.$row["durum"].'</td>';
+                echo '</tr>';
+              }
+                }
+            else if($_SESSION["staj"]["rol"] == 3){
+                        echo '<tr data-cost='.$row["pId"].'>';
+                        echo '<td>'.$row["pId"].'</td>';
+                        if ($rol==1)
+                          echo '<td>'.$row["ogAdi"].' '.$row["ogSoyadi"].'</td>';
+                        else if($rol==2)
+                          echo '<td>'.$row["dAdi"].' '.$row["dSoyadi"].'</td>';
+                        echo '<td>'.$row["pAdi"].'</td>';
+                        echo '<td>'.$row["pTur"].'</td>';
+                        echo '<td>'.$row["kisi_sayisi"].'</td>';
+                        echo '<td>'.$row["danisman_sayisi"].'</td>';
+                        echo '<td>';
+                        echo '<div class="form-group">';
+               if(ogrenciProjeBasvurmusmu($row["pId"])==0){
+                echo '<select class="form-control">';
+                $sonuc2=projeDurumList();
+                $i=0;
+                while ($row2=mysqli_fetch_array($sonuc2)) {
+                  if($row["pdId"]==$i)
+                  echo '<option value="'.$i.'" selected>'.$row2["durum"].'</option>';
+                  else
+                  echo '<option value="'.$i.'">'.$row2["durum"].'</option>';
+
+                  $i++;
+                }
+                echo '</select>';
+              }
+                        echo '</div>';
+                        echo '</td>';
+                        echo '</tr>';
+                  }
+                }
+              }
+           }
+      else{
+        echo "sorgu yanlış";
+      }
+   }
+
+
+  function projeDurumList()
+  {
+      global $conn;
+      $sorgu="select durum from tbl_projedurum";
+      $sonuc =mysqli_query($conn,$sorgu);
+      if ($sonuc) {
+        return $sonuc;
+      }
+  }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+  function danismanProjeOner($proje,$kullaniciRol,$kullaniciID)
+  {
+
+        $projeAd= $proje->getAdi();
+        $projeAciklama= $proje->getKonu();
+        $projeTuru= $proje->getTur();
+        $grupSayisi= $proje->getKisiSayisi();
+        $danismanSayisi= $proje->getDanismanSayisi();
+
+          if ($proje->getKisiSayisi()=="") {
+            $grupSayisi=1;
+          }
+          if ($proje->getDanismanSayisi()=="") {
+            $danismanSayisi=1;
+          }
+        global $conn;
+        $danismanID=danismanId($kullaniciID);
+
+        $query="INSERT INTO tbl_proje(oneren_id,adi,konu,turu,kisi_sayisi,danisman_sayisi,projedurum_id,accept_date) VALUES
+        ('$danismanID','$projeAd','$projeAciklama','$projeTuru','$grupSayisi','$danismanSayisi', 0, ".date("Y/m/d").")";
+
+          if (@mysqli_query($conn,$query)) {
+            echo successMesaj("İşlem başarılı bir şekilde tamamlandı...");
+          }
+          else{
+            echo errorMesaj("Proje önerisi başarısız...");
+          }
+  }
+
+  function projeTuruHepsiniGetir()
+  {
+      global $conn;
+      $sorgu="select * from tbl_projeturu";
+      $sonuc =mysqli_query($conn,$sorgu);
+      if ($sonuc)
+      {
+        return $sonuc;
+     //         while($row=mysqli_fetch_array($sonuc)){
+     //         	echo '<option value="'.$row["id"].'">'.$row["tur"].'</option>';
+     //         }
+      }
+   }
+  }
 
  ?>

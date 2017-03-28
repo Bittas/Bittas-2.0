@@ -1,38 +1,11 @@
 <?php
-	
-	//$_SESSION['staj']->getID();
+	include_once("Controller/mesajlarC.php");
+	$aliciAdiSoyadi=MesajlarC::getMetoduIleAliciAdiSoyadi();
 	$id=$_SESSION['staj']['id'];
 	
 	if(@$_POST){
-		if(@$_POST["m"]=="gitti"){
-			if ($_POST["aliciIDgiden"]) {
-			$alici=$_POST["aliciIDgiden"];
-			$konu=$_POST["konu"];
-			$alicininMesaj=$_POST["alicininMesaj"];
-			$tarih=Date("j-n-o");
-			global $conn;
-			$sorgu="insert into tbl_mesaj(gonderen_id,alici_id,konu,mesaj,durum,tarih) value('$id','$alici','$konu','$alicininMesaj','0','$tarih')";
-			if (@mysqli_query($conn,$sorgu)) {
-				echo successMesaj("mesaj gönderildi");
-			}
-			else{
-				echo errorMesaj("mesaj gönderilemedi");
-			}
-
-			}
-			else
-				echo errorMesaj("Alıcı girmediniz, tekrar deneyin");
-		}
-		else{
-			//Mesaj silme i?lemini burada yap?yorum
-			global $conn;
-			$idGizli=$_POST["idgizli"];
-			$sorgu="delete from tbl_mesaj where id='$idGizli'";
-			$sonuc=mysqli_query($conn,$sorgu);
-		}
+		echo MesajlarC::mesajGonder();
 	}
-
-	
 ?>
 
 <!doctype html>
@@ -41,7 +14,6 @@
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <link href="projem.css" rel="stylesheet" type="text/css">
  
-
 
 <script language="javascript" type="text/javascript">
 			$(function()
@@ -79,7 +51,7 @@
 
 <body>
 <?php
-		$diziMesajlarSayisi=gelenGidenMesajSayisi($id);
+		$diziMesajlarSayisi=MesajlarC::gelenGidenMesajSayisi();
 ?>
 <div id="mesaj">
 	<div id="mesajright">
@@ -111,7 +83,7 @@
  
  
  
-	<div id="mesajleft" class="gelenKutusu">
+	<div id="mesajleft" class="gelenKutusu" style="overflow-y: scroll;" height="100">
 	<div class="col-md-9" style="width:100%">
           <div class="box box-primary" >
 		<div class="box-header with-border">
@@ -127,36 +99,30 @@
               <div class="table-responsive mailbox-messages">
                 <table class="table table-hover table-striped">
                   <tbody>
-		<?php
-		global $conn;
-
-		//$sorgu = "SELECT `adi`,`soyadi`,`foto`,`tarih`,`tbl_mesaj`.`id` FROM `tbl_mesaj` LEFT JOIN `tbl_kullanici` ON tbl_mesaj.gonderen_id = tbl_kullanici.id WHERE `alici_id`='".$_SESSION['staj']->getID()."'";
-		  $sorgu = "SELECT `adi`,`soyadi`,`foto`,`tarih`,`tbl_mesaj`.`id`,`tbl_mesaj`.`durum` FROM `tbl_mesaj` LEFT JOIN `tbl_kullanici` ON tbl_mesaj.gonderen_id = tbl_kullanici.id WHERE `alici_id`='".$id."'";
-		$sonuc=mysqli_query($conn,$sorgu);
-
-		if($sonuc){
-			while($sutun=mysqli_fetch_row($sonuc)){
-				if ($sutun[5]=='1') {
-				echo '
-                  <tr>
-                    <td><img src="'.$sutun[2].'" width="80px" height="64px" /></td>
-                    <td class="mailbox-name" ><a href="#" id="'.$sutun[4].'" class="mesajiicerik" >'.$sutun[0]." ".$sutun[1].'</a></td>
-					<td class="mailbox-date">'.$sutun[3].'</td>
-                  </tr>
-                  ';
-				}
-				else{
-				echo '
-                  <tr>
-                    <td><img src="'.$sutun[2].'" width="80px" height="64px" /></td>
-                    <td class="mailbox-name" ><b><a href="#" id="'.$sutun[4].'" class="mesajiicerik">'.$sutun[0]." ".$sutun[1].'</a></b></td>
-					<td class="mailbox-date"><b>'.$sutun[3].'</b></td>
-                  </tr>
-                  ';
-				}
-			}
-		}
-		?>	
+		<?php $sonuc=MesajlarC::gelenKutusu();
+		
+		while($sutun=mysqli_fetch_row($sonuc)){
+            if ($sutun[5]=='1') {
+                echo '
+                <tr>
+                <td><img src="'.$sutun[2].'" width="80px" height="64px" /></td>
+                <td class="mailbox-name" ><a href="#" id="'.$sutun[4].'" class="mesajiicerik" >'.$sutun[0]." ".$sutun[1].'</a></td>
+                <td class="mailbox-date">'.$sutun[3].'</td>
+                </tr>
+                ';
+            }
+            else{
+                echo '
+                <tr>
+                <td><img src="'.$sutun[2].'" width="80px" height="64px" /></td>
+                <td class="mailbox-name" ><b><a href="#" id="'.$sutun[4].'" class="mesajiicerik">'.$sutun[0]." ".$sutun[1].'</a></b></td>
+                <td class="mailbox-date"><b>'.$sutun[3].'</b></td>
+                </tr>
+                ';
+            }
+        }
+		
+		 ?>	
 		</tbody>
                 </table>
                 <!-- /.table -->
@@ -176,7 +142,7 @@
 
 	
 	
-	<div id="mesajleft" class="gidenKutusu" style="visibility:hidden;">
+	<div id="mesajleft" class="gidenKutusu" style="visibility:hidden; overflow-y: scroll;" height="100">
 		<div class="col-md-9" style="width:100%">
           <div class="box box-primary" >
 		<div class="box-header with-border">
@@ -192,27 +158,18 @@
               <div class="table-responsive mailbox-messages">
                 <table class="table table-hover table-striped">
                   <tbody>
-		<?php
-		global $conn;
-
-		//$sorgu = "SELECT `adi`,`soyadi`,`foto`,`tarih`,`tbl_mesaj`.`id` FROM `tbl_mesaj` LEFT JOIN `tbl_kullanici` ON tbl_mesaj.alici_id = tbl_kullanici.id WHERE `gonderen_id`='".$_SESSION['staj']->getID()."'";
-		$sorgu = "SELECT `adi`,`soyadi`,`foto`,`tarih`,`tbl_mesaj`.`id` FROM `tbl_mesaj` LEFT JOIN `tbl_kullanici` ON tbl_mesaj.alici_id = tbl_kullanici.id WHERE `gonderen_id`='".$id."'";
-		$sonuc=mysqli_query($conn,$sorgu);
-
-		if($sonuc){
+		<?php $sonuc=MesajlarC::gidenKutusu(); 
+		
 			while($sutun=mysqli_fetch_row($sonuc)){
 				echo 
-				'				
-            
-                  <tr>
-                    <td><img src="'.$sutun[2].'" width="64px" height="64px" /></td>
-                    <td class="mailbox-name" ><a href="#" id="'.$sutun[4].'" class="mesajiicerikGiden" >'.$sutun[0]." ".$sutun[1].'</a></td>
-					<td class="mailbox-date">'.$sutun[3].'</td>
-                  </tr>
-                  ';
-				
+				'<tr>
+				<td><img src="'.$sutun[2].'" width="64px" height="64px" /></td>
+				<td class="mailbox-name" ><a href="#" id="'.$sutun[4].'" class="mesajiicerikGiden" >'.$sutun[0]." ".$sutun[1].'</a></td>
+				<td class="mailbox-date">'.$sutun[3].'</td>
+				</tr>
+				';
 			}
-		}
+
 		?>
 		</tbody>
                 </table>
@@ -284,8 +241,10 @@
 			<form action="" method="post">
 				<div class="box-body">
 				  <div class="form-group">
-						<div id="aliciaramabolumu">
-							<input type="text" id="alici" name="alici" placeholder="Alıcı Adı:" class="form-control" autocomplete="off">
+						<div id="aliciaramabolumu"><?php echo '<input type="text" '; 
+						if(isset($_GET["aliciId"]) && $_GET["aliciId"]!=null){ echo ' value="'.$aliciAdiSoyadi.'"'; }
+						echo 'id="alici" name="alici" placeholder="Alıcı Adı:" class="form-control" autocomplete="off">';
+						 ?>
 							<div class="alicikarama_sonuc" style="position:absolute;">
 								<div class="aliciarama_sonuc" style="cursor:pointer; background-color: black;">
 								<span>Sonuc</span>
@@ -304,8 +263,10 @@
 				<!-- /.box-body -->
 				<div class="box-footer">
 				  <div class="pull-right">
-				  		<input type="hidden" name="m" value="gitti" />
-						<input type="hidden" name="aliciIDgiden" id ="aliciIDgidenid"></input>
+				  		<input type="hidden" name="m" value="gitti" /><?php echo '<input type="hidden" '; 
+						if(isset($_GET["aliciId"]) && $_GET["aliciId"]!=null){ echo ' value="'.$_GET["aliciId"].'"'; }
+						echo ' name="aliciIDgiden" id ="aliciIDgidenid"></input>';
+						 ?>
 					<button type="submit" class="btn btn-primary"><i class="fa fa-envelope-o"></i> Gönder</button>
 				  </div>
 				</div>
@@ -325,50 +286,19 @@
 
 
 <script>
-/*
-function mesajlarimmm(i) {
-	console.log("mesajlarimmm("+i+")");
-    var xmlhttp = new XMLHttpRequest();
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                console.log(xmlhttp.responseText);
-            }
-        };
-        xmlhttp.open("GET", "mesajIcerikGetir.php?q=" + i, true);
-        xmlhttp.send();
-}
-
-function yenimesajlarim(i) {
-    document.getElementById(i).style.visibility='visible';
-	document.getElementById("mesajlarim").style.visibility='hidden';
-}
-function anamesaj(i) {
-	document.getElementById("yenimesajlarim").style.visibility='hidden';
-	document.getElementById("mesajlarim").style.visibility='hidden';
-}
-*/
-
-
-/*
-var checkBoxSayac = function() {
-  var n = $( "input:checked" ).length;
-  if(n==0){
-	$("#gizle").css("display","none");
-  }
-  else{
-	$("#gizle").css("display","inline");
-  }
-}
-checkBoxSayac();
- 
-$( "input[type=checkbox]" ).on( "click", checkBoxSayac );
-*/
-
-
 $(document).ready(function()
 {		
 	$(".gidenKutusu").hide();
-	$("#yeniMesajYolla").hide();
+    var SearchString = window.location.search.substring(1); //sayfa=mesajlar&aliciId=2
+    var VariableArray = SearchString.split('&');
+		if(VariableArray.length>1){
+			console.log("show time");
+			$("#yeniMesajYolla").show();
+		}
+		else{
+			console.log("hide time");
+			$("#yeniMesajYolla").hide();
+		}
 	$("#yenimesajlarim").hide();
 	//document.getElementsByClassName('gidenKutusu').style.visibility='hidden';
     $("msjkonu").click(function()
@@ -411,7 +341,7 @@ $(document).ready(function()
 		console.log("this: "+ this.id);
 		$.ajax({
 		  method: "POST",
-		  url: "mesajIcerikGetir.php",
+		  url: "mesajIcerikGetirAjax.php",
 		  data: { "q" : this.id },
 		  dataType: "json",
 		  success:function(veri){
@@ -456,7 +386,7 @@ $(document).ready(function()
 		console.log("this: "+ this.id);
 		$.ajax({
 		  method: "POST",
-		  url: "mesajGidenMesajGetir.php",
+		  url: "mesajGidenMesajGetirAjax.php",
 		  data: { "q" : this.id },
 		  dataType: "json",
 		  success:function(veri){

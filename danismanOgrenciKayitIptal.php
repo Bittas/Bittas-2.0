@@ -22,7 +22,20 @@
                   <th>E-Posta</th>
                   <th>Onay</th>
                 </tr>
-                <?php danismanOgrenciKayitOnaylılar(); ?>
+                <?php 
+                include_once("Controller/danismanOgrenciKayitlariC.php");
+                $sonuc=DanismanOgrenciKayitlariC::danismanOgrenciKayitOnaylılar();
+                while($satir=mysqli_fetch_array($sonuc)){
+                  echo '
+                  <tr data-cost='.$satir["kID"].'>
+                  <td>'.$satir["oNo"].'</td>
+                  <td>'.$satir["oEmail"].'</td>
+                  <td><input type="checkbox" class="pasif" checked id="'.$satir["kID"].'" onchange="OgrKayitIptal(this);"
+                  value="'.$satir["kID"].'"></td>
+                  </tr>
+                  ';
+                }
+                ?>
               </table>
             </div>
             <!-- /.box-body -->

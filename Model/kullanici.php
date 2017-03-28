@@ -10,7 +10,7 @@ class Kullanici implements IKullanici
  private  $rol;
  private  $onay;
  private  $foto;
- private  $hakkinda;
+ private  $hakkimda;
  
 
   public function getAdi()
@@ -63,10 +63,10 @@ class Kullanici implements IKullanici
   {
     $this->foto=$value;
   }
-  public function getHakkinda(){
+  public function getHakkimda(){
     return $this->hakkinda;
   }
-  public function setHakkinda($value)
+  public function setHakkimda($value)
   {
     $this->hakkinda=$value;
   }

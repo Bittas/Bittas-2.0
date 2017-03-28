@@ -22,7 +22,22 @@
                   <th>E-Posta</th>
                   <th>Onay</th>
                 </tr>
-                <?php danismanOgrenciKayitOnayBekleyen(); ?>
+                <?php
+                include_once("Controller/danismanOgrenciKayitlariC.php");
+                $sonuc=DanismanOgrenciKayitlariC::danismanOgrenciKayitOnayBekleyen();
+                while($satir=mysqli_fetch_array($sonuc)){
+                  echo '
+                  <tr data-cost='.$satir["kID"].'>
+                  <td>'.$satir["oNo"].'</td>
+                  <td>'.$satir["oEmail"].'</td>
+                  <td><input type="checkbox" class="pasif" id="'.$satir["kID"].'" onchange="OgrKayitOnay(this);"
+                  value="'.$satir["kID"].'"></td>
+                  <td><input type="submit" class="pasif" id="'.$satir["kID"].'" onclick="OgrKayitSil(this);"
+                  value="Sil"></td>
+                  </tr>
+                  ';
+                }
+       ?>
               </table>
             </div>
             <!-- /.box-body -->
@@ -40,6 +55,26 @@ var id = $(element).attr('id');
         type: "POST",
         url: "ajaxOgrenciKayitOnayla.php",
         data: {pasifYap: pasifYap,id:id},
+        success: function(cevap){
+            $("#sonuc").html(cevap);
+            setTimeout(function() {
+            $('.alert').remove();
+            }, 1500);
+        }
+    });
+    
+return true;
+}
+      </script>
+      <script type="text/javascript">
+      function  OgrKayitSil(element){
+// store the values from the form checkbox box, then send via ajax below
+var id = $(element).attr('id');
+    
+    $.ajax({
+        type: "POST",
+        url: "ajaxOgrenciKayitOnayla.php",
+        data: {sil: "sil",id:id},
         success: function(cevap){
             $("#sonuc").html(cevap);
             setTimeout(function() {

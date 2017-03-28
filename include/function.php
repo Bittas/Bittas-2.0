@@ -35,10 +35,16 @@ require_once("include/functionRaporIslemleri.php");
          require_once("ogrProfilDuzenle.php");
       }
     }
-    else if ($sayfa=="proje-oner")
+       else if ($sayfa=="proje-oner")
     {
       if($_SESSION["staj"]["rol"] == 2){// proje önerme sayfaları buraya !!!
         require_once("danismanProjeOner.php");
+      }
+    }
+		else if ($sayfa=="proje-revize")
+    {
+      if($_SESSION["staj"]["rol"] == 2){// proje önerme(revize) sayfaları buraya !!!
+        require_once("danismanProjeRevize.php");
       }
     }
     else if ($sayfa=="proje-onerilen")
@@ -71,6 +77,9 @@ require_once("include/functionRaporIslemleri.php");
     else if($sayfa=="mesajlar"){
       require_once("mesajlar.php");
     }
+    else if($sayfa=="mesajlarToplu"){
+      require_once("mesajlarToplu.php");
+    }
     else if($sayfa=="komisyon-proje-onerileri"){
       require_once("komisyonOneriProjeDurum.php");
     }
@@ -83,14 +92,21 @@ require_once("include/functionRaporIslemleri.php");
 		else if($sayfa=="proje-danisman-sayisi"){
       require_once("komisyonProjeDanismanSayisi.php");
     }
+		//////////////////////////		//////////////////////////		//////////////////////////	
+	else if($sayfa=="komisyon-danisman-ekle"){
+		  require_once("komisyonProjeyeDanismanEkle.php");
+		}
+		else if($sayfa=="komisyon-danisman-ekle-detayli-gorunum"){
+			require_once("komisyonProjeDanismanlariniListele.php");
+		}
 
 		//////////////////////////
 
 
 		else if($sayfa=="form-goster"){//////////////////////////////////////
 			require_once("staj_form.php");
-		}else if($sayfa=="danisman-islemleri"){//////////////////////////////
-			require_once("danisman_islemleri.php");
+		}else if($sayfa=="komisyon-danisman-islemleri"){//////////////////////////////
+			require_once("danismanEkle.php");
 		}///////
 		else if ($sayfa == "ogrenci-danisman-basvurusu"){
 			require_once("ogrenci_danisman_basvuru.php");

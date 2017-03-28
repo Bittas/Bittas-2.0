@@ -2,22 +2,15 @@
     ob_start();
     require_once("include/config.php");
     require_once("include/function.php");
+    include_once("Controller/girisKayitC.php");
     sessionKontrolIndexPage();
-	$sonuc="";
+    
 	if(@$_POST["giris"])
 	{
-		$email =@$_POST["email"];
-		$parola =@$_POST["parola"];
-
-
-		$sonuc=girisYap($email,$parola);
+		echo GirisKayitC::ogrenciGiris();
 	}
   if (@$_POST["kaydol"]) {
-    $email =@$_POST["email"];
-    $parola =@$_POST["parola"];
-    $no=@$_POST["no"];
-    $sonuc=kaydol($email,$parola,$no);
-    echo $sonuc;
+    echo GirisKayitC::ogrenciKayit();
   }
 ?>
 <!DOCTYPE html>

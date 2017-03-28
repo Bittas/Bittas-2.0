@@ -1,4 +1,6 @@
-
+<?php
+	include_once("/Controller/danismanOnerilenProjelerC.php");
+ ?>
         <div class="col-xs-12">
           <div class="box">
             <div class="box-header">
@@ -24,9 +26,11 @@
                   <th>Grup</th>
                   <th>Danışman</th>
                   <th>Durum</th>
+									<th>Revize İşlemi</th>
                 </tr>
                 <?php
-                  onerilenProjeler();
+                $projeOnerileri = new danismanOnerilenProjelerC();
+                $projeOnerileri->danismanOnerilenProjeler();
                 ?>
               </table>
             </div>

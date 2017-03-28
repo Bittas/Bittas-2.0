@@ -22,6 +22,7 @@
   <script src="js/jquery-3.1.1.min.js"></script>
   <script src="js/komisyonDanismanSayisi.js"></script>
   <link rel="stylesheet" href="css/uploadfilecss/component.css" />
+      <script src="js/komisyonProjeyeDanismanEkle.js"></script>
   <script>(function(e,t,n){var r=e.querySelectorAll("html")[0];r.className=r.className.replace(/(^|\s)no-js(\s|$)/,"$1js$2")})(document,window,0);</script>
 </head>
 

@@ -1,7 +1,17 @@
 <?php
-if (@$_POST["projeOner"]) {
-  projeOner();
-}
+	include_once("/Controller/danismanProjeOnerC.php");
+	include_once("/Controller/danismanProjeTuruHepsiniGetirC.php");
+	$projeOner = new danismanProjeOnerC();
+    if (@$_POST["projeOner"])
+    {
+	        if (@$_POST["projeAdi"] !="" &&
+	        @$_POST["projeAciklama"] !=""&&
+	        @$_POST["projeTuru"] !="")
+	        {
+						$projeOner->danismanProjeOner();
+	        }else
+	        echo errorMesaj("Lütfen boşlukları doldurunuz..");
+     }
 ?>
 <div class="col-xs-12">
 <form method="POST">
@@ -20,15 +30,17 @@ if (@$_POST["projeOner"]) {
 
                 <div class="form-group">
                   <label>Proje Açıklama</label>
-                  <textarea name="projeAciklama" class="form-control" rows="3" placeholder="proje açıklamasını giriniz..."></textarea>
+                  <textarea name="projeAciklama" class="form-control" rows="3" placeholder="proje açıklamasını giriniz...">
+									</textarea>
                 </div>
 
                 <div class="form-group">
                   <label>Proje Türü</label>
                   <select name="projeTuru" class="form-control">
                   <?php
-                    //projeTuruHepsiniGetir();
-                  $sonuc=projeTuruHepsiniGetir();
+									//
+									$projeOner = new danismanProjeTuruHepsiniGetirC();
+                  $sonuc = $projeOner->projeTuruHepsiniGetir();
                   while($row=mysqli_fetch_array($sonuc)){
                   echo '<option value="'.$row["id"].'">'.$row["tur"].'</option>';
                   }
@@ -76,27 +88,27 @@ if (@$_POST["projeOner"]) {
 				  <input type="submit" name="projeOner" class="btn btn-primary">
 			  </div>
         </div>
-              </form>
-</div>
+        </form>
+        </div>
 <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 <script>
 $(document).ready(function()
 {
-  $("#grupRadioDiv").hide();
-  $("#danısmanRadioDiv").hide();
+    $("#grupRadioDiv").hide();
+    $("#danısmanRadioDiv").hide();
 
-  $( "#optionsRadios2" ).on( "click", function() {
-  $( "#grupRadioDiv" ).show();
-});
-  $( "#optionsRadios1" ).on( "click", function() {
-  $( "#grupRadioDiv" ).hide();
-});
+    $( "#optionsRadios2" ).on( "click", function() {
+    $( "#grupRadioDiv" ).show();
+  });
+    $( "#optionsRadios1" ).on( "click", function() {
+    $( "#grupRadioDiv" ).hide();
+  });
 
-  $( "#optionsRadios4" ).on( "click", function() {
-  $( "#danısmanRadioDiv" ).show();
-});
-  $( "#optionsRadios3" ).on( "click", function() {
-  $( "#danısmanRadioDiv" ).hide();
-});
+    $( "#optionsRadios4" ).on( "click", function() {
+    $( "#danısmanRadioDiv" ).show();
+  });
+    $( "#optionsRadios3" ).on( "click", function() {
+    $( "#danısmanRadioDiv" ).hide();
+  });
 });
 </script>

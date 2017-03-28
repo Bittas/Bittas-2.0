@@ -7,7 +7,7 @@ interface IProje{
   public function ogrenciProjeBasvuruListeleHepsi($isaret,  $proje);//bitti
   public function ogrenciProjeBasvuruListeleDetayli($isaret,$proje);//bitti
 
-  public function onerilenProjeler();//bitti
+  public function onerilenProjeler($kullaniciID,$rol);//bitti
   public function projeDurumList();//bitti
   public function projeTuruHepsiniGetir();//bitti
 }

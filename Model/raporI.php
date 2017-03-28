@@ -1,10 +1,10 @@
 <?php
 interface IRapor{
-  public function raporYukle($dosya);//bitti
-  public function raporYukleVeritabani($link);//bitti
-  public function raporGetirKisiyeGore();//bitti
-  public function raporYukleyebilirMi();//bitti
-  public function danismanRaporOgrenciListeGetir();//bitti
-  public function danismanRaporProjeGetir($projeId,$ogrenciId);//bitti
+  public function raporYukleVeritabani();//bitti //çalışıyor
+  public function raporGetirKisiyeGore();//bitti //çalışıyor
+  public function raporYukleyebilirMi();//bitti //çalışıyor
+  public function danismanRaporOgrenciListeGetir($id,$tur);//bitti //çalışıyor
+  function sonRaporTarihi($projeId,$ogrenciId);//bitti //çalışıyor
+  public function danismanRaporProjeGetir();//bitti
 }
  ?>

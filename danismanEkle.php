@@ -1,5 +1,5 @@
 	<?php
-		include_once("/Controller/danismanIslemleriC.php");
+		include_once("/Controller/danismanEkleC.php");
 	$sonuc="";
 	if(@$_POST["ekle"])
 	{
@@ -14,11 +14,11 @@
 		@$_POST["unvan"] !=""&&
 		@$_POST["tc"] !="")
 		{
-			$danismanNesne=new DanismanIslemleriC();
-		$sonuc=$danismanNesne->danismanEkle();
-		echo $sonuc;
+			$danismanNesne=new danismanEkleC();
+			$sonuc=$danismanNesne->danismanEkle();
+			echo $sonuc;
 		}else
-		echo errorMesaj("Lütfen boşlukları doldurunuz");
+			echo errorMesaj("Lütfen boşlukları doldurunuz..");
 
 	}
 ?>

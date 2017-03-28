@@ -1,9 +1,10 @@
 <?php
 
+include_once("kullanici.php");
 include_once("ogrenciI.php");
-class Ogrenci implements IOgrenci
+class Ogrenci extends Kullanici implements IOgrenci
 {
-  private $id;
+  private $ogrenciId;
   private $numara;
   private $cinsiyet;
   private $dogum_tarihi;
@@ -15,6 +16,14 @@ class Ogrenci implements IOgrenci
   private $bolum;
   private $sinif;
   private $user_id;
+  private static $ogrenciNesne;
+  
+  public static function getOgrenciNesne()
+  {
+    if(@$ogrenciNesne==null)//undefine diyor
+      $ogrenciNesne=new Ogrenci();
+    return $ogrenciNesne;
+  }
 
   public function getNumara()
   {
@@ -64,11 +73,11 @@ class Ogrenci implements IOgrenci
   {
     $this->adres=$value;
   }
-  public function getUniversite()
+  public function getUni()
   {
     return $this->uni;
   }
-  public function setUniversite($value)
+  public function setUni($value)
   {
     $this->uni=$value;
   }
@@ -121,33 +130,16 @@ class Ogrenci implements IOgrenci
   }
 
 
-  	function profilGuncelleOgrenci()
+  	function profilGuncelleOgrenci($id)
   	{
-  		$id =$_SESSION["staj"]["id"];
-
-  		$mail=temizle(@$_POST["mail"]);
-  		$parola=temizle(@$_POST["parola"]);
-  		$adi=temizle(@$_POST["ad"]);
-  		$soyadi=temizle(@$_POST["soyad"]);
-  		$cinsiyet=temizle(@$_POST["cinsiyet"]);
-  		$uni=temizle(@$_POST["uni"]);
-  		$fakulte=temizle(@$_POST["fakulte"]);
-  		$bolum=temizle(@$_POST["bolum"]);
-  		$sinif=temizle(@$_POST["sinif"]);
-  		$okul_no=temizle(@$_POST["okul_no"]);
-  		$il=temizle(@$_POST["il"]);
-  		$ilce=temizle(@$_POST["ilce"]);
-  		$adres=temizle(@$_POST["adres"]);
-  		$akademisyen=temizle(@$_POST["akademisyen"]);
-  		$hakkimda=temizle(@$_POST["hakkimda"]);
-
+      
   		global $conn;
   		$msg ="";
-  		$query ="UPDATE tbl_kullanici SET adi='$adi' , soyadi ='$soyadi' ,mail ='$mail',hakkimda='$hakkimda' ";
-  		$yuklenecek_dosya = "profil/" . md5($_FILES['foto']['name']).substr($_FILES['foto']['name'], -4);
-  		if($_FILES["foto"]["name"] != "")
+  		$query ="UPDATE tbl_kullanici SET adi='".parent::getAdi()."' , soyadi ='".parent::getSoyadi()."' ,mail ='".parent::getMail()."',hakkimda='".parent::getHakkimda()."' ";
+  		$yuklenecek_dosya = "profil/" . md5(parent::getFoto()['name']).substr(parent::getFoto()['name'], -4);
+  		if(parent::getFoto()["name"] != "")
   		{
-  			if (move_uploaded_file($_FILES['foto']['tmp_name'], $yuklenecek_dosya))
+  			if (move_uploaded_file(parent::getFoto()['tmp_name'], $yuklenecek_dosya))
   			{
   			    $query .=",foto='$yuklenecek_dosya' ";
   			    $_SESSION["staj"]["foto"]=$yuklenecek_dosya;
@@ -158,13 +150,13 @@ class Ogrenci implements IOgrenci
   				$msg =errorMesaj("Foto yüklenemedi");
   			}
   		}
-  		if($parola !="")
+  		if(parent::getParola()!="")
   		{
-  			$parola =md5($parola);
-  			$query .=" , parola='$parola'";
+  			parent::setParola(md5(parent::getParola()));
+  			$query .=" , parola='".parent::getParola()."'";
   		}
   		$query .=" where id =$id ; ";
-  		$query2="UPDATE tbl_ogrenci set numara='$okul_no' , cinsiyet=$cinsiyet , il=$il , ilce=$ilce , adres='$adres' , uni=$uni , fakulte=$fakulte , bolum=$bolum , sinif='$sinif' where user_id=$id";
+  		$query2="UPDATE tbl_ogrenci set numara='$this->numara' , cinsiyet=$this->cinsiyet , il=$this->il , ilce=$this->ilce , adres='$this->adres' , uni=$this->uni , fakulte=$this->fakulte , bolum=$this->bolum , sinif='$this->sinif' where user_id=$id";
 
   		if(mysqli_query($conn,$query) && mysqli_query($conn,$query2))
   		{
@@ -174,6 +166,14 @@ class Ogrenci implements IOgrenci
   			return errorMesaj("Profil güncelleme işleminde hata");
   		}
   	}
+  public function ogrenciProfilGetir($id){
+    global $conn;
+    $query_profil="SELECT * from tbl_kullanici as k inner join tbl_ogrenci as o on k.id=o.user_id where k.id='$id'";
+
+    $kisi_sonuc=mysqli_query($conn,$query_profil);
+    $kisi =mysqli_fetch_array($kisi_sonuc);
+    return $kisi;
+  }
 
 
     function ogrenciProjeAlmismi($ogrId,$projeTuruId){
@@ -542,6 +542,57 @@ function ogrenciOnaylanmisProjeGetir(){
     	}
     	return $sayi;
     }
+
+
+    public function giris()
+    {
+        
+      global $conn;
+      $query ="select * from tbl_kullanici where mail='".parent::getMail()."' and parola='".parent::getParola()."' and onay=1"; //şifresi,mail doğru ve aktif olanlar
+      $sonuc =mysqli_query($conn,$query);
+      if(@mysqli_num_rows($sonuc) ==1)
+      {
+        $row=mysqli_fetch_array($sonuc);
+        $rol=$row["rol"];
+        $mail=$row["mail"];
+        $id=$row["id"];
+        $adi =$row["adi"];
+        $soyadi =$row["soyadi"];
+        $foto =$row["foto"];
+
+        $query ="select id from tbl_mesaj where durum =0 and alici_id =$id";
+        $b_sayi=0;
+        if($sonuc=mysqli_query($conn,$query))
+        {
+          $b_sayi=mysqli_num_rows($sonuc);
+        }
+        $user=array("id"=>$id,"adi"=>$adi,"soyadi"=>$soyadi,"mail"=>$mail,"rol"=>$rol,"mesaj"=>$b_sayi,"foto"=>$foto);
+        return $user;
+      }
+      else
+        return "Kullanıcı kayıtlı veya Onaylı değil.";
+    }
+
+  public function kayit(){
+    global $conn;
+    $query="INSERT INTO tbl_kullanici(mail,parola,rol,onay,foto) VALUES('".parent::getMail()."', '".parent::getParola()."', '1', '0', 'profil/user.png')";
+    if (mysqli_query($conn,$query)) {
+      $id = mysqli_insert_id($conn);
+      $query2 ="INSERT INTO tbl_ogrenci(numara,user_id) VALUES($this->numara, $id)";
+
+      if (mysqli_query($conn,$query2)) {
+				//header("Location: index.php");
+        return "<script>alert('kayıt başarılı...');</script>";
+
+      }
+      else{
+        return "<script>alert('kayıt başarısız1...');</script>";
+      }
+    }
+    else{
+      return "<script>alert('kayıt başarısız2...');</script>";
+    }
+  }
 }
 
  ?>

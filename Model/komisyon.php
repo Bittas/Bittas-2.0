@@ -12,7 +12,14 @@ class Komisyon implements IKomisyon
   private $foto;
   private $hakkinda;
 
-
+	public function getId()
+    {
+      return $this->id;
+    }
+    public function setId($value)
+    {
+      $this->id=$value;
+    }
     public function getAdi()
     {
       return $this->adi;
@@ -72,26 +79,347 @@ class Komisyon implements IKomisyon
     }
 
 
-    	function mailkont($email)
-    	{
-    		$query="SELECT * FROM `tbl_kullanici` WHERE mail='$email'";
-    		global $conn;
+ ////////////////////////////////////////////////////////////////////////////////
 
-    		$sonuc =mysqli_query($conn,$query);
-    		$durum=mysqli_num_rows($sonuc);
-    	return $durum;
+function danismanProjeleriListele($proje)
+{
+    global $conn;
+    $projeAdi = $proje->getAdi();
+    $projeOnay = $proje->getProjeDurum();
+    $projeTuru = $proje->getTur();
+    echo $this->tablo();
+      $query2 ="SELECT
+              P.id AS projeId,
+              P.adi AS projeAdi,
+              PD.durum AS projeDurumu,
+              PT.tur AS projeTuru
+              FROM
+              tbl_proje AS P
+              INNER JOIN
+              tbl_projedurum AS PD
+              ON
+              P.projedurum_id = PD.id
+              INNER JOIN
+              tbl_projeturu AS PT
+              ON
+              P.turu = PT.id
+              WHERE P.adi LIKE '%$projeAdi%'
+              AND
+              P.projedurum_id LIKE '%$projeOnay%'
+              AND
+              P.turu LIKE '%$projeTuru%'
+            ";
+            $satir=0;
+            $sonuc2 =mysqli_query($conn,$query2);
+             while($sutun=mysqli_fetch_array($sonuc2))
+             {
+             $onayDurumu = $sutun["projeDurumu"];
+                 if($onayDurumu == "Pasif")
+                 {
+                      $satir++;
+                       echo '<tr>
+                       <td title="'.$satir.'">'.$satir.'</td>
+                       <td title="'.$sutun["projeAdi"].'">'.$sutun["projeAdi"].'</td>
+                       <td title="'.$sutun["projeTuru"].'">'.$sutun["projeTuru"].'</td>
+                       <td><span class="label label-warning">Onaylanmamış</span></td>
+                       <td><a href="index.php?sayfa=komisyon-danisman-ekle-detayli-gorunum&id='.$sutun["projeId"].'" class="fa fa-search"/></td>
+                       </tr>  ';
+                 }
+                 else if($onayDurumu == "Aktif"){
+                       $satir++;
+                        echo '<tr>
+                        <td title="'.$satir.'">'.$satir.'</td>
+                        <td title="'.$sutun["projeAdi"].'">'.$sutun["projeAdi"].'</td>
+                        <td title="'.$sutun["projeTuru"].'">'.$sutun["projeTuru"].'</td>
+                        <td><span class="label label-success ">Onaylanmış</span></td>
+                        <td><a href="index.php?sayfa=komisyon-danisman-ekle-detayli-gorunum&id='.$sutun["projeId"].'" class="fa fa-search"/></td>
+                        </tr>  ';
+                 }
+
+        }
+            echo "</table>";
+ }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function danismanProjeleriListeleHepsi()
+{
+    global $conn;
+    echo $this->tablo();
+      $query2 ="SELECT
+              P.id AS projeId,
+              P.adi AS projeAdi,
+              PD.durum AS projeDurumu,
+              PT.tur AS projeTuru
+              FROM
+              tbl_proje AS P
+              INNER JOIN
+              tbl_projedurum AS PD
+              ON
+              P.projedurum_id = PD.id
+              INNER JOIN
+              tbl_projeturu AS PT
+              ON
+              P.turu = PT.id WHERE 1";
+
+           $satir=0;
+           $sonuc2 =mysqli_query($conn,$query2);
+            while($sutun=mysqli_fetch_array($sonuc2))
+            {
+            $onayDurumu = $sutun["projeDurumu"];
+                if($onayDurumu == "Pasif")
+                {
+                     $satir++;
+                      echo '<tr>
+                      <td title="'.$satir.'">'.$satir.'</td>
+                      <td title="'.$sutun["projeAdi"].'">'.$sutun["projeAdi"].'</td>
+                      <td title="'.$sutun["projeTuru"].'">'.$sutun["projeTuru"].'</td>
+                      <td><span class="label label-warning">Onaylanmamış</span></td>
+                      <td><a href="index.php?sayfa=komisyon-danisman-ekle-detayli-gorunum&id='.$sutun["projeId"].'" class="fa fa-search"/></td>
+                      </tr>  ';
+                }
+                else if($onayDurumu == "Aktif"){
+                      $satir++;
+                       echo '<tr>
+                       <td title="'.$satir.'">'.$satir.'</td>
+                       <td title="'.$sutun["projeAdi"].'">'.$sutun["projeAdi"].'</td>
+                       <td title="'.$sutun["projeTuru"].'">'.$sutun["projeTuru"].'</td>
+                       <td><span class="label label-success ">Onaylanmış</span></td>
+                       <td><a href="index.php?sayfa=komisyon-danisman-ekle-detayli-gorunum&id='.$sutun["projeId"].'" class="fa fa-search"/></td>
+                       </tr>  ';
+                }
+
+       }
+           echo "</table>";
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+public function tablo()
+{
+return '  <table id="databaseTablo" class="table table-bordered table-striped">
+                <thead>
+                <tr>
+                  <th>Sıra</th>
+                  <th>Proje Adı</th>
+                  <th>Proje Türü</th>
+                  <th>Proje Durumu</th>
+                  <th>Detay</th>
+                </tr>
+                </thead>
+                <tbody>
+                ';
+    }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    function komisyonProjeDanismanlariniListele($danisman)
+    {
+      global $conn;
+      $sayi=0;
+      $sayac=0;
+      $proje_id=0;
+      $danismanAdi=$danisman->getAdi();
+      $danismanSoyadi=$danisman->getSoyadi();
+      $query="SELECT
+      K.adi,
+      K.soyadi,
+      D.id AS ODid
+      FROM
+      tbl_danisman AS D
+      INNER JOIN
+      tbl_kullanici AS K
+      ON D.user_id = K.id
+      WHERE
+      K.adi LIKE '%$danismanAdi%'
+      &&
+      K.soyadi LIKE '%$danismanSoyadi%'
+      ";
+
+      if(@$sonuc =mysqli_query($conn,$query))
+      {
+       if(@mysqli_num_rows($sonuc))
+       {
+         while($sutun=mysqli_fetch_array($sonuc))
+         {
+             $danismanId = $sutun["ODid"];
+              $query2 ="SELECT
+              count(*) as sayi
+              FROM
+              tbl_danisman AS D
+              INNER JOIN
+              tbl_proje_danisman AS PD
+              ON
+              D.id = PD.danisma_id
+              INNER JOIN
+              tbl_proje AS P
+              ON
+              P.id = PD.proje_id
+              WHERE
+              D.id= '$danismanId'
+              &&
+              P.id= '".$_GET["id"]."'
+              ";
+                  $sonuc2 =mysqli_query($conn,$query2);
+                  if($sutun2=mysqli_fetch_array($sonuc2))
+                  {$sayi=$sutun2["sayi"];
+                  }
+                  if($sayi>0)
+                  {
+                      $sayac++;
+                      echo '<tr><td>'.$sayac.'</td>
+                      <td title="'.$sutun["adi"].'">'.$sutun["adi"].'</td>
+                      <td title="'.$sutun["soyadi"].'">'.$sutun["soyadi"].'</td>
+                      <td><input type="checkbox" class="active" name="'.$_GET["id"].'"
+                       onchange="komDanismanEkle(this)" value="'.$danismanId.'"
+                      checked></td></tr>';
+                  }else{
+                      $sayac++;
+                      echo '<tr><td>'.$sayac.'</td>
+                      <td title="'.$sutun["adi"].'">'.$sutun["adi"].'</td>
+                      <td title="'.$sutun["soyadi"].'">'.$sutun["soyadi"].'</td>
+                      <td><input type="checkbox" class="active" name="'.$_GET["id"].'"
+                       onchange="komDanismanEkle(this)" value="'.$danismanId.'"
+                      ></td></tr>';
+                   }
+              }
+             }
+            else
+            echo errorMesaj("Danışman bulunamadı");
+        }
+      }
+
+    public function komisyonTumProjeDanismanlariniListele()
+    {
+    	global $conn;
+    	$sayi=0;
+    	$sayac=0;
+      $proje_id=0;
+	    $query="SELECT
+      K.adi,
+      K.soyadi,
+      D.id AS ODid
+      FROM
+      tbl_danisman AS D
+			INNER JOIN
+      tbl_kullanici AS K ON D.user_id = K.id WHERE 1";
+
+	    if(@$sonuc =mysqli_query($conn,$query))
+	    {
+       if(@mysqli_num_rows($sonuc))
+		   {
+	       while($sutun=mysqli_fetch_array($sonuc))
+         {
+             $danismanId = $sutun["ODid"];
+			        $query2 ="SELECT
+              count(*) as sayi
+              FROM
+              tbl_danisman AS D
+              INNER JOIN
+              tbl_proje_danisman AS PD
+              ON
+              D.id = PD.danisma_id
+              INNER JOIN
+              tbl_proje AS P
+              ON
+              P.id = PD.proje_id
+              WHERE
+              D.id= '$danismanId'
+              &&
+              P.id= '".$_GET["id"]."'
+              ";
+                  $sonuc2 =mysqli_query($conn,$query2);
+    		          if($sutun2=mysqli_fetch_array($sonuc2))
+    		          {$sayi=$sutun2["sayi"];
+    		          }
+          		if($sayi>0)
+              {
+          		    $sayac++;
+          		    echo '<tr><td>'.$sayac.'</td>
+                  <td title="'.$sutun["adi"].'">'.$sutun["adi"].'</td>
+                  <td title="'.$sutun["soyadi"].'">'.$sutun["soyadi"].'</td>
+                  <td><input type="checkbox" class="active" name="'.$_GET["id"].'"
+				           onchange="komDanismanEkle(this)" value="'.$danismanId.'"
+				          checked></td></tr>';
+              }else{
+			            $sayac++;
+		              echo '<tr><td>'.$sayac.'</td>
+                  <td title="'.$sutun["adi"].'">'.$sutun["adi"].'</td>
+                  <td title="'.$sutun["soyadi"].'">'.$sutun["soyadi"].'</td>
+                  <td><input type="checkbox" class="active" name="'.$_GET["id"].'"
+				           onchange="komDanismanEkle(this)" value="'.$danismanId.'"
+				          ></td></tr>';
+			         }
+			        }
+		         }
+            else
+			      echo errorMesaj("Danışman bulunamadı");
+        }
+      }
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    	public function danismanEkle($danisman)
+    	{
+      		$sifre=MD5($danisman->getParola());
+          $mail = $danisman->getMail();
+      		global $conn;
+      		if($this->mailkont($danisman->getMail())==0 )
+      		{
+                if($this->tckont($danisman->getUniId())==0)
+                {
+          		$query ="INSERT INTO `bittas`.`tbl_kullanici` (`id`, `adi`, `soyadi`, `mail`, `parola`, `rol`, `onay`, `foto`, `hakkimda`)
+              VALUES ('', '".$danisman->getAdi()."', '".$danisman->getSoyadi()."','".$danisman->getMail()."', '$sifre', '".$danisman->getRol()."', '1', '".$danisman->getFoto()."', '".$danisman->getHakkinda()."');";
+          		$sonuc =mysqli_query($conn,$query);
+          		$query1= "Select id from tbl_kullanici where mail='".$danisman->getMail()."'";
+
+          		$sonuc1 =mysqli_query($conn,$query1);
+                		if($satir = mysqli_fetch_array($sonuc1))
+                		{
+                		$user_id= $satir["id"];
+                		$query2= "INSERT INTO `bittas`.`tbl_danisman` (`id`, `tc`, `unvan`, `user_id`, `uni_id`)
+                		VALUES ('', '".$danisman->getTc()."','".$danisman->getUnvan()."', '".$danisman->getUserId()."','".$danisman->getUniId()."')";
+                  //echo "id ".$user_id;
+                  //echo "/n".$query2;
+                    $sonuc2 =mysqli_query($conn,$query2);
+                    }
+          		return successMesaj("Danışman eklendi");
+
+            		}else
+            			return errorMesaj("Lütfen farklı bir tc kimlik numarası giriniz");
+
+      		}else
+      			return errorMesaj("Lütfen farklı bir mail adresi giriniz");
     	}
 
-    	function tckont($tc)
-    	{
-    		$query="SELECT * FROM `tbl_danisman` WHERE tc='$tc'";
-    		global $conn;
 
-    		$sonuc =mysqli_query($conn,$query);
-    		$durum=mysqli_num_rows($sonuc);
-    	return $durum;
-    	}
+      public function mailkont($email)
+      {
+        $query="SELECT * FROM `tbl_kullanici` WHERE mail='$email'";
+        global $conn;
 
+        $sonuc =mysqli_query($conn,$query);
+        $durum=mysqli_num_rows($sonuc);
+        return $durum;
+      }
+
+
+      public function tckont($tc)
+      {
+        $query="SELECT * FROM `tbl_danisman` WHERE tc='$tc'";
+        global $conn;
+
+        $sonuc =mysqli_query($conn,$query);
+        $durum=mysqli_num_rows($sonuc);
+        return $durum;
+      }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   	function komisyonEslesmeGor(){
           if (isset($_GET["tur"])) {

@@ -1,3 +1,7 @@
+      <?php
+      include_once("Controller/mesajlarC.php");
+        $diziMesajlarSayisi=MesajlarC::gelenGidenMesajSayisi($id);
+      ?>
       <ul class="sidebar-menu">
         <li class="header">KOMİSYON  İŞLEMLERİ</li>
 
@@ -9,9 +13,9 @@
               </span>
             </a>
             <ul class="treeview-menu">
-      		      <li><a href="index.php?sayfa=danisman-islemleri"><i class="fa fa-user"></i> <span>Sisteme Danışman Ekle</span></a></li>
+      		      <li><a href="index.php?sayfa=komisyon-danisman-islemleri"><i class="fa fa-user"></i> <span>Sisteme Danışman Ekle</span></a></li>
 
-      		      <li><a href="#"><i class="fa fa-user"></i> <span>Projeye Danışman Ekle</span></a></li>
+      		      <li><a href="index.php?sayfa=komisyon-danisman-ekle"><i class="fa fa-user"></i> <span>Projeye Danışman Ekle</span></a></li>
 
       		      <li><a href="index.php?sayfa=proje-danisman-sayisi"><i class="fa fa-user"></i> <span>Proje Danışman Sayısı</span></a></li>
             </ul>
@@ -96,6 +100,10 @@
                     </span>
                   </a>
                   <ul class="treeview-menu">
-          					<li><a href="#"><i class="fa fa-group"></i>Toplu Mesaj</a></li>
-            					<li><a href="#"><i class="fa fa-group"></i>Bireysel Mesaj</a></li>
+            					<li><a href="index.php?sayfa=mesajlar"><i class="fa fa-group"></i>Bireysel Mesaj
+            <span class="pull-right-container">
+              <small class="label pull-right bg-yellow"><?php echo $diziMesajlarSayisi['giden'][0]; ?></small>
+              <small class="label pull-right bg-blue"><?php echo $diziMesajlarSayisi['gelen'][0]; ?></small>
+            </span></a></li>
+          					<li><a href="index.php?sayfa=mesajlarToplu"><i class="fa fa-group"></i>Toplu Mesaj</a></li>
                   </ul>
